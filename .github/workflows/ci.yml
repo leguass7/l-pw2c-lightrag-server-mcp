@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths-ignore:
+      - ".vscode/**"
+      - ".cursor/**"
+      - "docs/**"
+      - ".gitignore"
+      - "README.md"
+  pull_request:
+    paths-ignore:
+      - ".vscode/**"
+      - ".cursor/**"
+      - "docs/**"
+      - ".gitignore"
+      - "README.md"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20, 22]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test
+        run: npm run test:ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Package dry-run
+        run: npm run package:check

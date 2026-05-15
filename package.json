@@ -1,0 +1,77 @@
+{
+  "name": "l-pw2c-lightrag-server-mcp",
+  "version": "1.2.0",
+  "description": "Servidor MCP (stdio ou HTTP Streamable) para a API HTTP LightRAG — Cursor, n8n, npx.",
+  "type": "module",
+  "bin": {
+    "l-pw2c-lightrag-server-mcp": "./dist/cli.js"
+  },
+  "main": "./dist/cli.js",
+  "files": [
+    "dist",
+    "README.md",
+    "TOOLS_SUMMARY.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "packageManager": "npm@11.10.1",
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsx src/cli.ts",
+    "dev:http": "tsx src/cli.ts --sse",
+    "lint": "eslint . && prettier --check .",
+    "format": "prettier --write .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:ci": "vitest run --reporter=dot",
+    "prepack": "npm run build",
+    "package:check": "npm pack --dry-run",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "changeset publish"
+  },
+  "keywords": [
+    "mcp",
+    "lightrag",
+    "model-context-protocol",
+    "healthdev",
+    "healthdevio",
+    "pw2c"
+  ],
+  "author": "Leandro Sbrissa <leandro.sbrissa@hotmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/healthdevio/l-pw2c-lightrag-server-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/healthdevio/l-pw2c-lightrag-server-mcp/issues"
+  },
+  "homepage": "https://github.com/healthdevio/l-pw2c-lightrag-server-mcp#readme",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.27.1",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.30.0",
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^22.19.3",
+    "@vitest/coverage-v8": "^4.0.18",
+    "eslint": "^10.0.2",
+    "prettier": "^3.8.1",
+    "tsup": "^8.5.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.56.1",
+    "vitest": "^4.0.18"
+  }
+}

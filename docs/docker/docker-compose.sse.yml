@@ -1,0 +1,61 @@
+# l-pw2c-lightrag-server-mcp — modo HTTP Streamable (--sse)
+#
+# Endpoint MCP: http://<host>:8000/mcp
+# Health:        http://<host>:8000/health
+# Clientes típicos: n8n MCP Client Tool, Cursor (url remota), outros clientes HTTP Streamable.
+#
+# Arranque:
+#   cp docs/docker/.env.example docs/docker/.env   # editar variáveis
+#   docker compose -f docs/docker/docker-compose.sse.yml up -d
+#
+# n8n (mesma rede Docker):
+#   Server Transport: HTTP Streamable
+#   Endpoint: http://l-pw2c-lightrag-mcp:8000/mcp
+#   Headers opcionais: LIGHTRAG-Server-Url, LIGHTRAG-API-Key, LIGHTRAG-WORKSPACE
+#
+# Traefik/nginx: desative buffering no path /mcp.
+
+services:
+  l-pw2c-lightrag-mcp:
+    image: node:22-alpine
+    container_name: l-pw2c-lightrag-mcp-sse
+    restart: unless-stopped
+    init: true
+    environment:
+      LIGHTRAG_SERVER_URL: ${LIGHTRAG_SERVER_URL:-http://host.docker.internal:9621}
+      LIGHTRAG_API_KEY: ${LIGHTRAG_API_KEY:-}
+      LIGHTRAG_TIMEOUT_MS: ${LIGHTRAG_TIMEOUT_MS:-120000}
+      LIGHTRAG_WORKSPACE: ${LIGHTRAG_WORKSPACE:-}
+      MCP_HTTP_PORT: ${MCP_HTTP_PORT:-8000}
+      MCP_HTTP_HOST: ${MCP_HTTP_HOST:-0.0.0.0}
+      MCP_HTTP_HEADER_OVERRIDES: ${MCP_HTTP_HEADER_OVERRIDES:-true}
+      MCP_ALLOWED_LIGHTRAG_HOSTS: ${MCP_ALLOWED_LIGHTRAG_HOSTS:-*}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command:
+      - sh
+      - -c
+      - >-
+        npm install -g "l-pw2c-lightrag-server-mcp@${PW2C_LIGHTRAG_MCP_VERSION:-1.2.0}"
+        && exec l-pw2c-lightrag-server-mcp --sse
+    ports:
+      - "${MCP_HTTP_PORT:-8000}:8000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "-q",
+          "--spider",
+          "http://127.0.0.1:8000/health",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 90s
+    networks:
+      - l_pw2c_lightrag_mcp
+
+networks:
+  l_pw2c_lightrag_mcp:
+    name: l_pw2c_lightrag_mcp

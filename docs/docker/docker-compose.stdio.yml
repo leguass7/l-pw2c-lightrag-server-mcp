@@ -1,0 +1,44 @@
+# l-pw2c-lightrag-server-mcp — modo stdio (predefinição)
+#
+# O MCP comunica por stdin/stdout (JSON-RPC). Não expõe portas HTTP.
+# Clientes típicos: Cursor, Claude Desktop (via docker compose run -i).
+#
+# Arranque interativo:
+#   docker compose -f docs/docker/docker-compose.stdio.yml run --rm -i l-pw2c-lightrag-mcp
+#
+# Cursor (.cursor/mcp.json) — ajuste o caminho absoluto do -f:
+#   {
+#     "mcpServers": {
+#       "l_pw2c_lightrag_docker": {
+#         "command": "docker",
+#         "args": [
+#           "compose",
+#           "-f", "C:/caminho/para/l-pw2c-lightrag-server-mcp/docs/docker/docker-compose.stdio.yml",
+#           "run", "--rm", "-i", "l-pw2c-lightrag-mcp"
+#         ]
+#       }
+#     }
+#   }
+#
+# LightRAG no host (porta 9621): use host.docker.internal (extra_hosts abaixo).
+# LightRAG noutro container: coloque os serviços na mesma rede e use o nome do serviço.
+
+services:
+  l-pw2c-lightrag-mcp:
+    image: node:22-alpine
+    init: true
+    stdin_open: true
+    tty: true
+    environment:
+      LIGHTRAG_SERVER_URL: ${LIGHTRAG_SERVER_URL:-http://host.docker.internal:9621}
+      LIGHTRAG_API_KEY: ${LIGHTRAG_API_KEY:-}
+      LIGHTRAG_TIMEOUT_MS: ${LIGHTRAG_TIMEOUT_MS:-30000}
+      LIGHTRAG_WORKSPACE: ${LIGHTRAG_WORKSPACE:-}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command:
+      - sh
+      - -c
+      - >-
+        npm install -g "l-pw2c-lightrag-server-mcp@${PW2C_LIGHTRAG_MCP_VERSION:-1.2.0}"
+        && exec l-pw2c-lightrag-server-mcp

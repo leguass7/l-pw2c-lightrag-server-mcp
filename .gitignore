@@ -1,0 +1,9 @@
+node_modules
+.env
+dist
+coverage
+.npmrc
+docs/specs
+docs/stacks
+
+.cursor
