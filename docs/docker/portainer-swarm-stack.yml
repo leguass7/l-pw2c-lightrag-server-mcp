@@ -3,12 +3,36 @@
 # Deploy: Portainer → Stacks → Add stack → Swarm → Web editor → colar este ficheiro.
 # Defina variáveis de ambiente na UI da stack (ou use .env no deploy CLI).
 #
-# Não use container_name em Swarm. Para n8n na mesma overlay, anexe a rede
-# l_pw2c_lightrag_mcp (attachable) ao stack do n8n ou use o routing mesh / Traefik.
+# Rede externa traefik_proxy: crie antes (docker network create -d overlay traefik_proxy)
+# ou use a rede já partilhada com o Traefik. Sem bloco `ports`, o MCP não é publicado
+# fora das redes overlay — só tarefas na mesma rede alcançam o serviço.
+#
+# Clientes no cluster (n8n, etc.): anexem o serviço à rede `traefik_proxy` e usem
+#   http://l-pw2c-lightrag-mcp:8000/mcp
+# Não são necessárias labels Traefik para descoberta interna; sem router Traefik,
+# o Traefik não expõe este serviço à Internet.
+#
+# Rede l_pw2c_lightrag_mcp (attachable): opcional para stacks que só falam com LightRAG
+# ou MCP noutra combinação de redes.
 #
 # Exemplo de variáveis:
 #   LIGHTRAG_SERVER_URL=https://lightrag.example.com
 #   MCP_ALLOWED_LIGHTRAG_HOSTS=lightrag.example.com
+#
+# --- Teste público TEMPORÁRIO (ex.: n8n.cloud não alcança rede interna) ---
+# Este MCP não valida login em /mcp: não deixes portas públicas sem firewall/IP fixo ou Traefik+auth.
+# Opção A: descomenta `ports:` mais abaixo → mesh Swarm na porta publicada (todas as VMs do swarm).
+# Opção B: router HTTPS no Traefik só para o teu IP ou com Basic Auth.
+# Endpoint no n8n: http(s)://<host>:<porta>/mcp  — sempre com sufixo /mcp
+#
+# --- Traefik (Swarm) ---
+# Coloca as labels em deploy.labels (não em services.labels — o provider Swarm lê deploy).
+# Obrigatório alinhar com a tua instância Traefik:
+#   - entrypoints (web / websecure) e nome do certresolver (ex.: letsencrypt)
+#   - traefik.docker.network = nome exacto da overlay onde Traefik e este serviço se veem (ex.: traefik_proxy)
+# Porta interna do backend: 8000 (MCP_HTTP_PORT). Reenvia /mcp e /health tal como no container.
+# Para sessões MCP longas, aumenta timeouts no Traefik (global ou router) se houver desconexões.
+# Exemplo de labels (descomenta e ajusta Host / certresolver):
 
 version: "3.8"
 
@@ -31,11 +55,12 @@ services:
       - >-
         npm install -g "l-pw2c-lightrag-server-mcp@${PW2C_LIGHTRAG_MCP_VERSION:-1.2.0}"
         && exec l-pw2c-lightrag-server-mcp --sse
-    ports:
-      - target: 8000
-        published: ${MCP_HTTP_PORT:-8000}
-        protocol: tcp
-        mode: ingress
+    # Descomenta só para diagnóstico; volta a comentar após o teste.
+    # ports:
+    #   - target: 8000
+    #     published: ${MCP_PUBLISH_PORT:-8000}
+    #     protocol: tcp
+    #     mode: ingress
     healthcheck:
       test:
         [
@@ -65,10 +90,22 @@ services:
       rollback_config:
         parallelism: 1
         delay: 10s
+      # Traefik (Swarm): descomenta e ajusta Host, entrypoints e certresolver ao teu Traefik.
+      # labels:
+      #   - traefik.enable=true
+      #   - traefik.docker.network=traefik_proxy
+      #   - traefik.http.routers.l_pw2c_mcp.rule=Host(`mcp.example.com`)
+      #   - traefik.http.routers.l_pw2c_mcp.entrypoints=websecure
+      #   - traefik.http.routers.l_pw2c_mcp.tls=true
+      #   - traefik.http.routers.l_pw2c_mcp.tls.certresolver=letsencrypt
+      #   - traefik.http.services.l_pw2c_mcp.loadbalancer.server.port=8000
     networks:
+      - traefik_proxy
       - l_pw2c_lightrag_mcp
 
 networks:
+  traefik_proxy:
+    external: true
   l_pw2c_lightrag_mcp:
     driver: overlay
     attachable: true

@@ -14,8 +14,10 @@ async function main(): Promise<void> {
     const envConfig = loadConfigFromEnv();
     const httpSettings = loadHttpOverrideSettingsFromEnv();
     const sessionStore = new SessionOverrideStore(envConfig, httpSettings);
-    const server = createMcpServer(undefined, { sessionStore });
-    await startHttpServer(server, { sessionStore });
+    await startHttpServer({
+      sessionStore,
+      createMcpServer: () => createMcpServer(undefined, { sessionStore }),
+    });
   } else {
     const server = createMcpServer();
     await startStdioServer(server);

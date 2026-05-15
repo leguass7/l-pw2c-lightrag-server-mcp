@@ -27,9 +27,10 @@ async function startMcpHttpStack(envLightragUrl: string): Promise<{
     envConfig,
     loadHttpOverrideSettingsFromEnv(),
   );
-  const mcp = createMcpServer({ cwd: process.cwd() }, { sessionStore });
-  const handle = await startHttpServer(mcp, {
+  const handle = await startHttpServer({
     sessionStore,
+    createMcpServer: () =>
+      createMcpServer({ cwd: process.cwd() }, { sessionStore }),
     port: 0,
     host: "127.0.0.1",
   });
@@ -308,9 +309,10 @@ describe("MCP HTTP header overrides", () => {
       envConfig,
       loadHttpOverrideSettingsFromEnv(),
     );
-    const mcp = createMcpServer({ cwd: process.cwd() }, { sessionStore });
-    const { url, close: closeMcp } = await startHttpServer(mcp, {
+    const { url, close: closeMcp } = await startHttpServer({
       sessionStore,
+      createMcpServer: () =>
+        createMcpServer({ cwd: process.cwd() }, { sessionStore }),
       port: 0,
       host: "127.0.0.1",
     });
@@ -358,9 +360,10 @@ describe("MCP HTTP header overrides", () => {
       envConfig,
       loadHttpOverrideSettingsFromEnv(),
     );
-    const mcp = createMcpServer({ cwd: process.cwd() }, { sessionStore });
-    const { url, close: closeMcp } = await startHttpServer(mcp, {
+    const { url, close: closeMcp } = await startHttpServer({
       sessionStore,
+      createMcpServer: () =>
+        createMcpServer({ cwd: process.cwd() }, { sessionStore }),
       port: 0,
       host: "127.0.0.1",
     });
@@ -418,9 +421,10 @@ describe("MCP HTTP header overrides", () => {
       envConfig,
       loadHttpOverrideSettingsFromEnv(),
     );
-    const mcp = createMcpServer({ cwd: process.cwd() }, { sessionStore });
-    const { url, close: closeMcp } = await startHttpServer(mcp, {
+    const { url, close: closeMcp } = await startHttpServer({
       sessionStore,
+      createMcpServer: () =>
+        createMcpServer({ cwd: process.cwd() }, { sessionStore }),
       port: 0,
       host: "127.0.0.1",
     });
@@ -461,9 +465,10 @@ describe("MCP HTTP header overrides", () => {
       envConfig,
       loadHttpOverrideSettingsFromEnv(),
     );
-    const mcp = createMcpServer({ cwd: process.cwd() }, { sessionStore });
-    const { url, close: closeMcp } = await startHttpServer(mcp, {
+    const { url, close: closeMcp } = await startHttpServer({
       sessionStore,
+      createMcpServer: () =>
+        createMcpServer({ cwd: process.cwd() }, { sessionStore }),
       port: 0,
       host: "127.0.0.1",
     });
@@ -512,9 +517,10 @@ describe("MCP HTTP header overrides", () => {
       envConfig,
       loadHttpOverrideSettingsFromEnv(),
     );
-    const mcp = createMcpServer({ cwd: process.cwd() }, { sessionStore });
-    const { url, close: closeMcp } = await startHttpServer(mcp, {
+    const { url, close: closeMcp } = await startHttpServer({
       sessionStore,
+      createMcpServer: () =>
+        createMcpServer({ cwd: process.cwd() }, { sessionStore }),
       port: 0,
       host: "127.0.0.1",
     });
@@ -551,9 +557,10 @@ describe("MCP HTTP header overrides", () => {
       envConfig,
       loadHttpOverrideSettingsFromEnv(),
     );
-    const mcp = createMcpServer({ cwd: process.cwd() }, { sessionStore });
-    const { url, close: closeMcp } = await startHttpServer(mcp, {
+    const { url, close: closeMcp } = await startHttpServer({
       sessionStore,
+      createMcpServer: () =>
+        createMcpServer({ cwd: process.cwd() }, { sessionStore }),
       port: 0,
       host: "127.0.0.1",
     });
